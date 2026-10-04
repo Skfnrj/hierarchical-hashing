@@ -37,7 +37,17 @@ class SHA256{
         return (x >> n) | (x << (32-n));
     }
 
-    //TODO: Write out the ch, maj, and sigma functions from pseudocode
+    // Choose (ch): For each bit index, if x is 1, the bit from y is chosen. If x is 0, choose the bit from z.
+    uint32_t ch(uint32_t x, uint32_t y, uint32_t z){
+        return (x & y) ^ (~x & z);
+    }
+
+    // Majority (maj): Returns majority bit of x, y, and z.
+    uint32_t maj(uint32_t x, uint32_t y, uint32_t z) {
+        return (x & y) ^ (x & z) ^ (y & z);
+    }
+
+    //TODO: Write out the sigma functions from pseudocode
     //TODO:Figure out how to handle the 512-bit message padding
 
 
