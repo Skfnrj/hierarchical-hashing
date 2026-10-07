@@ -50,28 +50,48 @@ class SHA256{
     }
 
     //Uppercase Sigma 0 and 1 (used in the main compression loop)
-    uint32_t upper_sigma(uint32_t x){
+    uint32_t upper_sigma0(uint32_t x){
         return rightrotate(x,2) ^ rightrotate(x,13) ^ rightrotate(x,22);
     }
 
-    uint32_t upper_sigma(uint32_t x){
+    uint32_t upper_sigma1(uint32_t x){
         return rightrotate(x,6) ^ rightrotate(x,11) ^ rightrotate(x,25);
     }
 
     //Lowercase sigma 0 and 1 (used to prepare the message schedule)
     //both use right rotation and a standard right shift
-    uint32_t lower_sigma(uint32_t x){
+    uint32_t lower_sigma0(uint32_t x){
         return rightrotate(x,7) ^ rightrotate(x,18) ^ (x >> 3);
     }
 
-    uint32_t lower_sigma(uint32_t x){
+    uint32_t lower_sigma1(uint32_t x){
         return rightrotate(x,17) ^ rightrotate(x,19) ^ (x >> 10);
     }
 
 
 
-    //TODO: Write out the sigma functions from pseudocode
-    //TODO:Figure out how to handle the 512-bit message padding
+    //Message to a multiple of 512 bits
+    std::vector<uint8_t>pad_message(const std::string& message){
+        std::vector<uint8_t> block(message.begin(),message.end());
+
+        //svae the length in bits before we start messing with it
+        uint64_t bit_len= block.size() * 8;
+
+        //append the 1 bit (0x80)
+        block.push_back(0x80);
+
+        //pad with zeros until we have exactly 8 bytes left at the end of the block
+        while (block.size() % 64 != 56){
+            block.push_back(0x00);
+        }
+
+        //append the original length at the very end
+        for(int i=7; i>.0; i--){
+            block.push_back((bit_len >> (i * 8)) & 0xFF);
+        }
+
+        return block;
+    }
 
 
 };
