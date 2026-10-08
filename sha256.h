@@ -86,7 +86,7 @@ class SHA256{
         }
 
         //append the original length at the very end
-        for(int i=7; i>.0; i--){
+        for(int i=7; i>=0; i--){
             block.push_back((bit_len >> (i * 8)) & 0xFF);
         }
 
