@@ -94,6 +94,60 @@ class SHA256{
     }
 
 
+
+    //processing a single 512-bit chunk
+    void process_block(const std::vector<uint8_t>& block){
+        uint32_t w[64];
+
+
+        //init first 16 words from the block (Draft 1: raw shift)
+        for(int i=0; i<16; i++){
+            w[i]= (block[i * 4] << 24) |
+                  (block[i * 4 + 1] << 16) |
+                  (block[i * 4 + 2] << 8) |
+                  (block[i * 4 + 3]);
+        }
+
+
+        //extand the remaining 48 words
+        for (int i=16; i<64; i++) {
+            w[i]= w[i-16] + lower_sigma0(w[i=15]) + w[i-7] + lower_sigma1(w[i-2]);
+        }
+
+        uint32_t a= h0, b=h1, c=h2, d=h3, e=h4, f=h5, g=h6, h=h7;
+
+        for(int i=0; i<64; i++){
+            uint32_t temp1= h + upper_sigma1(e) + ch(e, f, g) + k[i] + w[i];
+            uint32_t temp2= upper_sigma0(a) + maj(a, b, c);
+
+            h = g;
+            g = f;
+            f = e;
+            e = d + temp1;
+            d = c;
+            c = b;
+            b = a;
+            a = temp1 + temp2;
+
+        }
+        
+
+        //adding compressed chunk to current hash value
+        h0 += a;
+        h1 += b;
+        h2 += c;
+        h3 += d;
+        h4 += e;
+        h5 += f;
+        h6 += g;
+        h7 += h;
+
+
+    }
+
+    
+
+
 };
 
  
