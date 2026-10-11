@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 class SHA256{
     public:
@@ -100,18 +102,18 @@ class SHA256{
         uint32_t w[64];
 
 
-        //init first 16 words from the block (Draft 1: raw shift)
+        //init first 16 words from the block (fixed: cast to uint32_t first so the bit shift doesn't break)
         for(int i=0; i<16; i++){
-            w[i]= (block[i * 4] << 24) |
-                  (block[i * 4 + 1] << 16) |
-                  (block[i * 4 + 2] << 8) |
-                  (block[i * 4 + 3]);
+            w[i]= (uint32_t(block[i * 4]) << 24) |
+                  (uint32_t(block[i * 4 + 1]) << 16) |
+                  (uint32_t(block[i * 4 + 2]) << 8) |
+                   uint32_t(block[i * 4 + 3]);
         }
 
 
         //extand the remaining 48 words
         for (int i=16; i<64; i++) {
-            w[i]= w[i-16] + lower_sigma0(w[i=15]) + w[i-7] + lower_sigma1(w[i-2]);
+            w[i]= w[i-16] + lower_sigma0(w[i-15]) + w[i-7] + lower_sigma1(w[i-2]);
         }
 
         uint32_t a= h0, b=h1, c=h2, d=h3, e=h4, f=h5, g=h6, h=h7;
@@ -143,6 +145,36 @@ class SHA256{
         h7 += h;
 
 
+    }
+
+
+    //the main pub;ic function that hashes a string and then retruns the hex digest
+    std::string hash(const std::string& input){
+        h0 = 0x6a09e667;
+        h1 = 0xbb67ae85;
+        h2 = 0x3c6ef372;
+        h3 = 0xa54ff53a;
+        h4 = 0x510e527f;
+        h5 = 0x9b05688c;
+        h6 = 0x1f83d9ab;
+        h7 = 0x5be0cd19;
+
+        std::vector<uint8_t> padded = pad_message(input);
+
+        for(size_t i=0; i<padded.size(); i+= 64){
+            std::vector<uint8_t> chunk(padded.begin() + i, padded.begin() + i + 64);
+            process_block(chunk);
+        }
+
+        std:: stringstream ss;
+        ss << std::hex << std::setfill('0');
+        uint32_t final_hashes[] = {h0, h1, h2, h3, h4, h5, h6, h7};
+
+        for(int i=0; i<8; i++){
+            ss << std::setw(8) << final_hashes[i];
+        }
+
+        return ss.str();
     }
 
     
