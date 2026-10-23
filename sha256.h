@@ -1,13 +1,15 @@
 #ifndef SHA256_H
 #define SHA256_H
 
+
 #include <cstdint>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include "hash_function.h"
 
-class SHA256{
+class SHA256 : public HashFunction {
     public:
 
     //These are the initial hash values I got from Wikipedia pseudocode
@@ -148,8 +150,8 @@ class SHA256{
     }
 
 
-    //the main pub;ic function that hashes a string and then retruns the hex digest
-    std::string hash(const std::string& input){
+    //the main public function that hashes a string and then retruns the hex digest
+    std::string hash(const std::string& input) override{
         h0 = 0x6a09e667;
         h1 = 0xbb67ae85;
         h2 = 0x3c6ef372;
