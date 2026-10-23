@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "sha256.h"
+#include "hash_function.h"
 
 struct Node{
     std::string hash;
@@ -20,26 +20,16 @@ struct Node{
 class MerkleTree{
 private:
     Node* root;
-    SHA256 sha;
+    HashFunction* hash_alg;
 
     void destroy_tree(Node* node);
 
 public:
-    MerkleTree(){
-        root=nullptr;
-    }
-
-    ~MerkleTree(){
-        destroy_tree(root);
-    }
-
-    std::string combine_hashes(const std::string& hash1, const std::string& hash2){
-        return sha.hash(hash1 + hash2);
-    }
+    MerkleTree(HashFunction* alg);
+    ~MerkleTree();
 
     void build_tree(const std::vector<std::string>& data_blocks);
     std::string get_root_hash();
-
 };
 
 #endif
