@@ -6,6 +6,10 @@ MerkleTree::MerkleTree(HashFunction* alg){
     hash_alg = alg;
 }
 
+MerkleTree::~MerkleTree(){
+    destroy_tree(root);
+}
+
 
 //recursive helper to free memory
 void MerkleTree::destroy_tree(Node* node){
