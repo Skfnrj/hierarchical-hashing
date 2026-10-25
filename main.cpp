@@ -7,16 +7,19 @@
 #include "merkle_tree.h"
 
 
-std::string read_files(std::string filepath){
-    std::ifstream file(filepath);
-    if (!file.is_open()){
-        std::cout <<"Error opening file: " << filepath<< "\n";
-        return "";
+bool read_files(std::string filepath, std::string& content){
+    std::ifstream file(filepath, std::ios::binary);
+
+    if(!file.is_open()){
+        std::cout<<"Error opening file: "<< filepath << "\n";
+        return false;
     }
 
-    std::stringstream buffer;   
+    std::stringstream buffer;
     buffer<< file.rdbuf();
-    return buffer.str();
+    content= buffer.str();
+
+    return true;
 }
 
 int main(){
@@ -26,9 +29,10 @@ int main(){
     std::vector<std::string> filenames = {"fileA.txt", "fileB.txt", "fileC.txt"};
     std::vector<std::string> file_contents;
 
-    for(size_t i = 0; i < filenames.size(); i++){
-        std::string content = read_files(filenames[i]);
-        if(content != ""){
+    for(size_t i=0; i < filenames.size(); i++){
+        std::string content;
+
+        if(read_files(filenames[i], content)){
             file_contents.push_back(content);
         }
     }
