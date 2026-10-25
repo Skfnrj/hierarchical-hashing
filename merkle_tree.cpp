@@ -34,13 +34,13 @@ std::string combine_hashes(HashFunction* alg, const std::string& left, const std
 
 //build the tree from bottom up
 void MerkleTree::build_tree(const std::vector<std::string>& data_blocks){
-    if(data_blocks.empty()){
-        return;
-    }
-
-    if (root != nullptr){
+    if(root != nullptr){
         destroy_tree(root);
         root = nullptr;
+    }
+
+    if(data_blocks.empty()){
+        return;
     }
 
     std::vector<Node*> nodes;
