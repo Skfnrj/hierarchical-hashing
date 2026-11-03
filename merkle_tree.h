@@ -28,12 +28,18 @@ private:
 
     void destroy_tree(Node* node);
 
+    void compare_nodes(const Node* first, const Node* second,
+                        std::vector<int>& differences) const;
+
 public:
     MerkleTree(HashFunction* alg);
     ~MerkleTree();
 
     void build_tree(const std::vector<std::string>& data_blocks);
     std::string get_root_hash();
+
+    bool compare_tree(const MerkleTree& other,
+                        std::vector<int>& differences) const;
 };
 
 #endif

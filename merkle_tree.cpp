@@ -91,3 +91,42 @@ void MerkleTree::build_tree(const std::vector<std::string>& data_blocks){
     //set root
     root = nodes[0];
 }
+
+void MerkleTree::compare_nodes(const Node* first, const Node* second,
+                                std::vector<int>& differences) const{
+    if(first == nullptr || second == nullptr){
+        return;
+    }
+
+    //for matching hashes, skip this subtree
+    if(first->hash == second->hash){
+        return;
+    }
+
+    //differing leaf, its input position recorded
+    if(first->left == nullptr && first->right == nullptr){
+        differences.push_back(first->data_index);
+        return;
+    }
+
+    compare_nodes(first->left, second->left, differences);
+    compare_nodes(first->right, second->right, differences);
+
+}
+
+bool MerkleTree::compare_tree(const MerkleTree& other,
+                                std::vector<int>& differences) const{
+    differences.clear();
+
+    if(data_count != other.data_count){
+        return false;
+    }
+
+    //both trees must use the same hasshing object for now
+    if(hash_alg == nullptr || hash_alg != other.hash_alg){
+        return false;
+    }
+
+    compare_nodes(root, other.root, differences);
+    return true; 
+}
