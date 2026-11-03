@@ -9,11 +9,13 @@ struct Node{
     std::string hash;
     Node* left;
     Node* right;
+    int data_index; //for input position
 
     Node(std::string h){
         hash=h;
         left=nullptr;
         right=nullptr;
+        data_index = -1; //no individual ipnut position since it starts at 0
     }
 };
 

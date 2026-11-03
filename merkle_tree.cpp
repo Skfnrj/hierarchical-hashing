@@ -47,7 +47,9 @@ void MerkleTree::build_tree(const std::vector<std::string>& data_blocks){
     //hash base leaves
     for(size_t i=0; i < data_blocks.size(); i++){
         std::string current_hash = hash_alg->hash(data_blocks[i]);
-        nodes.push_back(new Node(current_hash));
+        Node* leaf = new Node(current_hash); //store leaf address
+        leaf->data_index = static_cast<int>(i); //record input position
+        nodes.push_back(leaf); //add tree pointer to current tree lvl
     }
 
 
