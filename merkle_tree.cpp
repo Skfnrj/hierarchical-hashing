@@ -4,6 +4,7 @@
 MerkleTree::MerkleTree(HashFunction* alg){
     root = nullptr;
     hash_alg = alg;
+    data_count = 0;
 }
 
 MerkleTree::~MerkleTree(){
@@ -38,6 +39,8 @@ void MerkleTree::build_tree(const std::vector<std::string>& data_blocks){
         destroy_tree(root);
         root = nullptr;
     }
+
+    data_count = data_blocks.size();
 
     if(data_blocks.empty()){
         return;

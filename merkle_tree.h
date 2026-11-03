@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <cstddef>
 #include "hash_function.h"
 
 struct Node{
@@ -23,6 +24,7 @@ class MerkleTree{
 private:
     Node* root;
     HashFunction* hash_alg;
+    std::size_t data_count;
 
     void destroy_tree(Node* node);
 
