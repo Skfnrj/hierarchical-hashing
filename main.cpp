@@ -1,46 +1,54 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <string>
 #include "sha256.h"
 #include "merkle_tree.h"
+#include "folder_reader.h"
 
-
-bool read_files(std::string filepath, std::string& content){
-    std::ifstream file(filepath, std::ios::binary);
-
-    if(!file.is_open()){
-        std::cout<<"Error opening file: "<< filepath << "\n";
-        return false;
+int main(int argc, char* argv[]){
+    if(argc !=3){
+        std::cout<< "Usage: ./merkle_demo <first_folder> <second_folder>\n";
+        return 1;
     }
 
-    std::stringstream buffer;
-    buffer<< file.rdbuf();
-    content= buffer.str();
+    std::vector<std::string> first_names;
+    std::vector<std::string> second_names;
+    std::vector<std::string> first_contents;
+    std::vector<std::string> second_contents;
 
-    return true;
-}
+    if(!read_folder(argv[1], first_names, first_contents) ||
+        !read_folder(argv[2], second_names, second_contents)){
+            return 1;
+    }
 
-int main(){
-    SHA256 sha256_alg;
-    MerkleTree tree(&sha256_alg);
+    if(first_names != second_names){
+        std::cout<< "The folders must contain the same filenames "
+                    "for this comparison.\n";
+        return 1;
+    }
 
-    std::vector<std::string> filenames = {"fileA.txt", "fileB.txt", "fileC.txt"};
-    std::vector<std::string> file_contents;
+    SHA256 sha;
+    MerkleTree first(&sha);
+    MerkleTree second(&sha);
 
-    for(size_t i=0; i < filenames.size(); i++){
-        std::string content;
+    first.build_tree(first_contents);
+    second.build_tree(second_contents);
 
-        if(read_files(filenames[i], content)){
-            file_contents.push_back(content);
+    std::vector<int> differences;
+    if(!first.compare_tree(second, differences)){
+        std::cout<< "Could not compare the two trees\n";
+        return 1;
+    }
+
+    if(differences.empty()){
+        std::cout<< "The files match\n";
+    }
+    else{
+        std::cout<< "Files with different contents:\n";
+        for(int index : differences){
+            std::cout<< first_names[index] << "\n";
         }
     }
-
-    tree.build_tree(file_contents);
-
-    std::cout << "Files Hashed: "<< file_contents.size() << "\n";
-    std::cout << "Merkle Root Hash: "<< tree.get_root_hash()<< "\n";
 
     return 0;
 }
