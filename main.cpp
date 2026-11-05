@@ -1,13 +1,16 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <filesystem>
+#include <system_error>
 #include "sha256.h"
 #include "merkle_tree.h"
 #include "folder_reader.h"
 
 int main(int argc, char* argv[]){
-    if(argc !=3){
-        std::cout<< "Usage: ./merkle_demo <first_folder> <second_folder>\n";
+    bool copy_changes = argc == 4 && std::string(argv[3]) == "--copy";
+    if(argc !=3 && !copy_changes){
+        std::cout<< "Usage: ./merkle_demo <first_folder> <second_folder> [--copy]\n";
         return 1;
     }
 
@@ -47,6 +50,32 @@ int main(int argc, char* argv[]){
         std::cout<< "Files with different contents:\n";
         for(int index : differences){
             std::cout<< first_names[index] << "\n";
+        }
+    }
+
+    if(copy_changes){
+        for(int index : differences){
+            const std::string& filename = first_names[index];
+
+            std::filesystem::path source = argv[1];
+            source.append(filename);
+
+            std::filesystem::path destination = argv[2];
+            destination.append(filename);
+
+            std::error_code error;
+            bool copied = std::filesystem::copy_file(
+                source, destination,
+                std::filesystem::copy_options::overwrite_existing, error);
+
+            if(!copied){
+                    std::cout<< "Could not copy "<< filename
+                             <<": " << error.message()<< "\n";
+                    return 1;
+                }
+
+            std::cout<< "Copied: "<< filename << "\n";
+            
         }
     }
 
