@@ -54,6 +54,15 @@ int main(int argc, char* argv[]){
     assert(list_files(folder.string(), filenames));
     assert(filenames == expected);
 
+    std::vector<std::string> contents;
+    std::vector<std::string> expected_contents = {
+        "first file", "", "last file"
+    };
+
+    assert(read_folder(folder.string(), filenames, contents));
+    assert(filenames == expected);
+    assert(contents == expected_contents);
+
     assert(list_files(empty_folder.string(), filenames));
     assert(filenames.empty());
 

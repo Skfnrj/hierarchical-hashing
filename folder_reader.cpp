@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <system_error>
+#include <fstream>
 
 bool list_files(const std::string& folder_path, std::vector<std::string>& filenames){
     filenames.clear();
@@ -40,4 +41,40 @@ bool list_files(const std::string& folder_path, std::vector<std::string>& filena
 
     std::sort(filenames.begin(), filenames.end());
     return true;
+}
+
+bool read_folder(const std::string&folder_path,
+                std::vector<std::string>& filenames,
+                std::vector<std::string>& contents){
+    contents.clear();
+
+    if(!list_files(folder_path, filenames)){
+        return false;
+    }
+
+    for(const std::string& filename : filenames){
+        std::filesystem::path file_path = folder_path;
+        file_path.append(filename);
+
+        std::ifstream file(file_path, std::ios::binary);
+        std::string data;
+        char buffer[4096];
+
+        while(file.read(buffer, sizeof(buffer))){
+            data.append(buffer, sizeof(buffer));
+        }
+
+        if(file.bad() || !file.eof()){
+            std::cout<< "Cannot read file: "<< file_path<< "\n";
+            filenames.clear();
+            contents.clear();
+            return false;
+        }
+
+        data.append(buffer, file.gcount());
+        contents.push_back(data);
+    }
+
+    return true;
+
 }
