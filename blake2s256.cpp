@@ -1,5 +1,8 @@
 #include "blake2s256.h"
 #include <cstdint>
+#include <cstddef>
+#include <iomanip>
+#include <sstream>
 
 static std::uint32_t rotate_right(std::uint32_t value, int count){
     return (value >> count) | (value << (32 - count));
@@ -77,4 +80,48 @@ static void compress(std::uint32_t state[8],
     for(int i=0; i < 8; i++){
         state[i] = state[i] ^ v[i] ^ v[i + 8];
     }
+}
+
+std::string BLAKE2s256::hash(const std::string& input){
+    std::uint32_t state[8];
+    for(int i = 0; i < 8; i++){
+        state[i] = IV[i];
+    }
+
+    //32-byte digest, no key, sequential hashing
+    state[0] ^= 0x01010020;
+
+    std::size_t offset = 0;
+
+    do{
+        std::uint32_t words[16] = {};
+        std::size_t remaining = input.size() - offset;
+        std::size_t block_size = remaining < 64 ? remaining : 64;
+
+        for(std::size_t i =0; i < block_size; i++){
+            std::uint32_t byte = static_cast<unsigned char>(input[offset + i]);
+            
+            std::size_t word_index = i/4;
+            std::size_t shift = 8 * (i % 4);
+
+            words[word_index] = words[word_index] | (byte << shift);
+        }
+
+        offset += block_size;
+        bool last_block = offset == input.size();
+
+        compress(state, words, offset, last_block);
+    }while(offset < input.size());
+
+    std::ostringstream output;
+    output << std::hex << std::setfill('0');
+
+    for(int i =0; i < 8; i++){
+        for(int shift = 0; shift < 32; shift +=8){
+            std::uint32_t byte = (state[i] >> shift) & 0xFF;
+            output << std::setw(2) << byte;
+        }
+    }
+
+    return output.str();
 }
