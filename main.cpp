@@ -6,12 +6,31 @@
 #include "sha256.h"
 #include "merkle_tree.h"
 #include "folder_reader.h"
+#include "blake2s256.h"
 
 int main(int argc, char* argv[]){
-    bool copy_changes = argc == 4 && std::string(argv[3]) == "--copy";
-    if(argc !=3 && !copy_changes){
-        std::cout<< "Usage: ./merkle_demo <first_folder> <second_folder> [--copy]\n";
+    bool copy_changes = false;
+    bool use_blake2s = false;
+
+    if(argc < 3 || argc > 5){
+        std::cout << "Usage: ./merkle_demo <first_folder> <second_folder> "
+                    "[--copy] [--blake2s]\n";
         return 1;
+    }
+
+    for(int i =3; i < argc; i++){
+        std::string option = argv[i];
+
+        if(option == "--copy" && !copy_changes){
+            copy_changes = true;
+        }
+        else if(option == "--blake2s" && !use_blake2s){
+            use_blake2s = true;
+        }
+        else{
+            std::cout << "Unknown or repeated option: " << option<< "\n";
+            return 1;
+        }
     }
 
     std::vector<std::string> first_names;
@@ -31,8 +50,15 @@ int main(int argc, char* argv[]){
     }
 
     SHA256 sha;
-    MerkleTree first(&sha);
-    MerkleTree second(&sha);
+    BLAKE2s256 blake;
+    HashFunction* hash_alg = &sha;
+
+    if(use_blake2s){
+        hash_alg = &blake;
+    }
+
+    MerkleTree first(hash_alg);
+    MerkleTree second(hash_alg);
 
     first.build_tree(first_contents);
     second.build_tree(second_contents);
