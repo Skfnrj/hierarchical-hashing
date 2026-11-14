@@ -131,25 +131,43 @@ bool MerkleTree::compare_tree(const MerkleTree& other,
     return true; 
 }
 
-static void print_node(const Node* node, const std::vector<std::string>& filenames,
-                        std::size_t depth){
+static void print_node(const Node* node, 
+                        const std::vector<std::string>& filenames,
+                        const std::string& prefix, bool is_last, bool is_root){
     if(node == nullptr){
         return;
     }
 
-    std::cout << std::string(depth *2, ' ');
+    if(!is_root){
+        //Unicode escapes for the tree's connectors.
+        std::cout<< prefix 
+                <<(is_last ? u8"\u2514\u2500\u2500 " : u8"\u251C\u2500\u2500 ");
+    }
 
     if(node->data_index >= 0){
         std::cout << filenames[node->data_index];
     }
     else{
-        std::cout << (depth == 0 ? "Root" : "Branch");
+        std::cout << (is_root ? "Root" : "Branch");
     }
 
     std::cout << ": "<< node->hash.substr(0, 12)<< "\n";
-    print_node(node->left, filenames, depth + 1);
-    print_node(node->right, filenames, depth + 1);
+    
+    if(node->left || node->right){
+        std::string next_prefix = prefix;
+        if(!is_root){
+            next_prefix += is_last ? "    " : u8"\u2502   ";
+        }
+
+        print_node(node->left, filenames, next_prefix,
+                    node->right == nullptr, false);
+        print_node(node->right, filenames, next_prefix, true, false);
+    }
 }
+
+
+
+
 
 void MerkleTree::print_tree(const std::vector<std::string>& filenames) const{
     if(root == nullptr){
@@ -162,5 +180,5 @@ void MerkleTree::print_tree(const std::vector<std::string>& filenames) const{
         return;
     }
 
-    print_node(root, filenames, 0);
+    print_node(root, filenames, "", true, true);
 }
