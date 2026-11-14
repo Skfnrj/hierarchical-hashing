@@ -11,10 +11,11 @@
 int main(int argc, char* argv[]){
     bool copy_changes = false;
     bool use_blake2s = false;
+    bool show_tree = false;
 
-    if(argc < 3 || argc > 5){
+    if(argc < 3 || argc > 6){
         std::cout << "Usage: ./merkle_demo <first_folder> <second_folder> "
-                    "[--copy] [--blake2s]\n";
+                    "[--copy] [--blake2s] [--show-tree]\n";
         return 1;
     }
 
@@ -26,6 +27,9 @@ int main(int argc, char* argv[]){
         }
         else if(option == "--blake2s" && !use_blake2s){
             use_blake2s = true;
+        }
+        else if(option == "--show-tree" && !show_tree){
+            show_tree = true;
         }
         else{
             std::cout << "Unknown or repeated option: " << option<< "\n";
@@ -62,6 +66,19 @@ int main(int argc, char* argv[]){
 
     first.build_tree(first_contents);
     second.build_tree(second_contents);
+
+    std::cout <<  "Source root:      "<< first.get_root_hash() << "\n";
+    std::cout <<  "Destination root: "<< second.get_root_hash() << "\n";
+
+    if(show_tree){
+        std::cout << "\nSource tree\n";
+        first.print_tree(first_names);
+
+        std::cout << "\nDestination tree\n";
+        second.print_tree(second_names);
+        std::cout << "\n";
+    }
+
 
     std::vector<int> differences;
     if(!first.compare_tree(second, differences)){
