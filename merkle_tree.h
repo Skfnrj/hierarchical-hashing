@@ -38,6 +38,8 @@ public:
     void build_tree(const std::vector<std::string>& data_blocks);
     std::string get_root_hash();
 
+    void print_tree(const std::vector<std::string>& filenames) const;
+
     bool compare_tree(const MerkleTree& other,
                         std::vector<int>& differences) const;
 };

@@ -130,3 +130,37 @@ bool MerkleTree::compare_tree(const MerkleTree& other,
     compare_nodes(root, other.root, differences);
     return true; 
 }
+
+static void print_node(const Node* node, const std::vector<std::string>& filenames,
+                        std::size_t depth){
+    if(node == nullptr){
+        return;
+    }
+
+    std::cout << std::string(depth *2, ' ');
+
+    if(node->data_index >= 0){
+        std::cout << filenames[node->data_index];
+    }
+    else{
+        std::cout << (depth == 0 ? "Root" : "Branch");
+    }
+
+    std::cout << ": "<< node->hash.substr(0, 12)<< "\n";
+    print_node(node->left, filenames, depth + 1);
+    print_node(node->right, filenames, depth + 1);
+}
+
+void MerkleTree::print_tree(const std::vector<std::string>& filenames) const{
+    if(root == nullptr){
+        std::cout<< "(empty tree)\n";
+        return;
+    }
+
+    if(filenames.size() != data_count){
+        std::cout << "Cannot display tree: filename count does not match\n";
+        return;
+    }
+
+    print_node(root, filenames, 0);
+}
